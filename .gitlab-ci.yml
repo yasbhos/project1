@@ -5,4 +5,4 @@ java:
 java_version:
   stage: test
   script:
-  - javac -version
+  - java --version
