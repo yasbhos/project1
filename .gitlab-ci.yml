@@ -2,3 +2,7 @@ java:
   stage: test
   script:
   - mvn clean test
+java_version:
+  stage: test
+  script:
+  - java --version
