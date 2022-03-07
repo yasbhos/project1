@@ -1,10 +1,12 @@
 java:
   stage: test
   script:
-  - mvn --version 
-  - java --version
+
   - mvn clean test
 java_version:
   stage: test
   script:
-  - javac -version
+    - whoami
+    - mvn --version 
+    - java --version
+    - javac -version
