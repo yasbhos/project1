@@ -1,6 +1,8 @@
 java:
   stage: test
   script:
+  - mvn --version 
+  - java --version
   - mvn clean test
 java_version:
   stage: test
