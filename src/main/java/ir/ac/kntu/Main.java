@@ -17,18 +17,25 @@ import java.util.ArrayList;
 public class Main {
 
     /**
-     * A map to save new Fariborz-Arrays
-     * key of each entery is name fo the value of the entery
+     * A map to save new fariborz Arrays
+     * key is a string that represents name of each array
+     * value is a FariborzArray
      */
     private static Map<String, FariborzArray> fariborzArrays = new HashMap<>();
 
     /**
-     * Anci codes to change color of the output text in command prompt
+     * Ansi code of Red color
      */
     public static final String ANSI_RESET = "\u001B[0m";
 
+    /**
+     * Ansi code of Green color
+     */
     public static final String ANSI_GREEN = "\u001B[32m";
 
+    /**
+     * Ansi code for reset color of output text to default
+     */
     public static final String ANSI_RED = "\u001B[31m";
 
     public static void main(String[] args) {
@@ -54,7 +61,7 @@ public class Main {
     /**
      * This method is used to handle the input and calls the appropriate methods
      *
-     * @param input
+     * @param input the entered line
      */
     public static void inputHandler(String input) {
         if (isInitializingStatement(input)) {
@@ -69,12 +76,14 @@ public class Main {
             fariborzArrayPrinter(matrixMultiplicationStatementHandler(input));
         } else if (isTransposingStatement(input)) {
             fariborzArrayPrinter(transposingStatementHandler(input));
-        } else if (isCutingStatement(input)) {
+        } else if (isCuttingStatement(input)) {
             fariborzArrayPrinter(cutingStatementHandler(input));
         } else if (isCombinationOperations(input)) {
             fariborzArrayPrinter(combinationOperationsHandler(input));
         } else {
-            System.out.println(ANSI_RED + "Invalid statement entered!" + ANSI_RESET);
+            System.out.println(ANSI_RED + "invalid statement entered!" + ANSI_RESET);
+            System.out.println(ANSI_RED + "OR\nyou entered an invalid name for variables" + ANSI_RESET);
+            System.out.println(ANSI_GREEN + "correct regex for variable names: \"[a-zA-Z]+\\w\"" + ANSI_RESET);
             return;
         }
     }
@@ -184,7 +193,7 @@ public class Main {
      * @param input the entered line
      * @return true if the input is a valid cutting statement otherwise return false
      */
-    public static boolean isCutingStatement(String input) {
+    public static boolean isCuttingStatement(String input) {
         if (input.matches(
                 "\s*[a-zA-Z]+\\w*\s*=\s*[a-zA-Z]+\\w*\s*((\\[[0-9]*:[0-9]*\\])|(\\[[0-9]*:[0-9]*:[0-9]*\\]))+")) {
             return true;
@@ -237,13 +246,12 @@ public class Main {
         } else {
             fariborzArrays.put(newArray.getName(), newArray);
         }
-        ;
 
         return newArray;
     }
 
     /**
-     * This method is used to handle the sharp statements
+     * This method is used to handle the changing statements
      *
      * @param input the entered line
      * @return the new changed FariborzArray
@@ -254,7 +262,7 @@ public class Main {
         String valueOfTargetElement = input.split("\s*=\s")[1].trim();
 
         if (!fariborzArrays.containsKey(nameOfTargetArray)) {
-            System.out.println(ANSI_RED + "(" + nameOfTargetArray + ")" + " Not found!" + ANSI_RESET);
+            System.out.println(ANSI_RED + "(" + nameOfTargetArray + ")" + " not found" + ANSI_RESET);
             return null;
         }
 
@@ -275,22 +283,31 @@ public class Main {
      * @return the new FariborzArray
      */
     public static FariborzArray elementWiseStatementHandler(String input) {
-        FariborzArray array1 = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*(\\*|\\/|\\+|\\-)\s*")[0].trim());
-        FariborzArray array2 = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*(\\*|\\/|\\+|\\-)\s*")[1].trim());
+        ArrayList<String> arrayNames = new ArrayList<>();
+        arrayNames.add(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*(\\*|\\/|\\+|\\-)\s*")[0].trim());
+        arrayNames.add(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*(\\*|\\/|\\+|\\-)\s*")[1].trim());
+        if (!fariborzArrays.containsKey(arrayNames.get(0))) {
+            System.out.println(ANSI_RED + "(" + arrayNames.get(0) + ")" + " not found" + ANSI_RESET);
+            return null;
+        } else if (!fariborzArrays.containsKey(arrayNames.get(1))) {
+            System.out.println(ANSI_RED + "(" + arrayNames.get(1) + ")" + " not found" + ANSI_RESET);
+            return null;
+        }
+
+        FariborzArray array1 = fariborzArrays.get(arrayNames.get(0));
+        FariborzArray array2 = fariborzArrays.get(arrayNames.get(1));
 
         if (array1.getType().matches("char|string") || array2.getType().matches("char|string")) {
-            System.out.println("wrong type");
+            System.out.println(ANSI_RED + "wrong type" + ANSI_RESET);
             return null;
         } else if (!array1.getType().equals(array2.getType())) {
-            System.out.println("inequality of types");
+            System.out.println(ANSI_RED + "inequality of types" + ANSI_RESET);
             return null;
         } else if (array1.getDimension() != array2.getDimension()) {
-            System.out.println("inequality of dimensions");
+            System.out.println(ANSI_RED + "inequality of dimensions" + ANSI_RESET);
             return null;
         } else if (!array1.isEqualSizes(array2)) {
-            System.out.println("inequality of sizes");
+            System.out.println(ANSI_RED + "inequality of sizes" + ANSI_RESET);
             return null;
         }
 
@@ -300,6 +317,7 @@ public class Main {
         }
         resultArray.setDimension(array1.getDimension());
         resultArray.setType(array1.getType());
+        resultArray.setSize(array1.getSize());
 
         Map<String, String> resultData = new HashMap<>();
 
@@ -359,22 +377,30 @@ public class Main {
      * @return the new FariborzArray
      */
     public static FariborzArray sharpStatementHandler(String input) {
-        FariborzArray array1 = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\#\s*")[0].trim());
-        FariborzArray array2 = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\#\s*")[1].trim());
+        ArrayList<String> arrayNames = new ArrayList<>();
+        arrayNames.add(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\#\s*")[0].trim());
+        arrayNames.add(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\#\s*")[1].trim());
+        if (!fariborzArrays.containsKey(arrayNames.get(0))) {
+            System.out.println(ANSI_RED + "(" + arrayNames.get(0) + ")" + " not found" + ANSI_RESET);
+            return null;
+        } else if (!fariborzArrays.containsKey(arrayNames.get(1))) {
+            System.out.println(ANSI_RED + "(" + arrayNames.get(1) + ")" + " not found" + ANSI_RESET);
+            return null;
+        }
 
+        FariborzArray array1 = fariborzArrays.get(arrayNames.get(0));
+        FariborzArray array2 = fariborzArrays.get(arrayNames.get(1));
         if (array1.getType().matches("int|float") || array2.getType().matches("int|float")) {
-            System.out.println("wrong type");
+            System.out.println(ANSI_RED + "wrong type" + ANSI_RESET);
             return null;
         } else if (!array1.getType().equals(array2.getType())) {
-            System.out.println("inequality of types");
+            System.out.println(ANSI_RED + "inequality of types" + ANSI_RESET);
             return null;
         } else if (array1.getDimension() != array2.getDimension()) {
-            System.out.println("inequality of dimensions");
+            System.out.println(ANSI_RED + "inequality of dimensions" + ANSI_RESET);
             return null;
-        } else if (!array1.getChandDarChand().equals(array2.getChandDarChand())) {
-            System.out.println("inequality of sizes");
+        } else if (!array1.isEqualSizes(array2)) {
+            System.out.println(ANSI_RED + "inequality of sizes" + ANSI_RESET);
             return null;
         }
 
@@ -385,6 +411,7 @@ public class Main {
 
         resultArray.setDimension(array1.getDimension());
         resultArray.setType("string");
+        resultArray.setSize(array1.getSize());
 
         Map<String, String> resultData = new HashMap<>();
 
@@ -423,22 +450,30 @@ public class Main {
      * @return the new FariborzArray
      */
     public static FariborzArray matrixMultiplicationStatementHandler(String input) {
-        FariborzArray array1 = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\@\s*")[0].trim());
-        FariborzArray array2 = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\@\s*")[1].trim());
+        ArrayList<String> arrayNames = new ArrayList<>();
+        arrayNames.add(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\@\s*")[0].trim());
+        arrayNames.add(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").split("\s*\\@\s*")[1].trim());
+        if (!fariborzArrays.containsKey(arrayNames.get(0))) {
+            System.out.println(ANSI_RED + "(" + arrayNames.get(0) + ")" + " not found" + ANSI_RESET);
+            return null;
+        } else if (!fariborzArrays.containsKey(arrayNames.get(1))) {
+            System.out.println(ANSI_RED + "(" + arrayNames.get(1) + ")" + " not found" + ANSI_RESET);
+            return null;
+        }
 
+        FariborzArray array1 = fariborzArrays.get(arrayNames.get(0));
+        FariborzArray array2 = fariborzArrays.get(arrayNames.get(1));
         if (array1.getType().matches("char|string") || array2.getType().matches("char|string")) {
-            System.out.println("wrong type");
+            System.out.println(ANSI_RED + "wrong type" + ANSI_RESET);
             return null;
         } else if (!array1.getType().equals(array2.getType())) {
-            System.out.println("inequality of types");
+            System.out.println(ANSI_RED + "inequality of types" + ANSI_RESET);
             return null;
         } else if (array1.getDimension() != 2 || array2.getDimension() != 2) {
-            System.out.println("wrong dimensions");
+            System.out.println(ANSI_RED + "wrong dimensions" + ANSI_RESET);
             return null;
-        } else if (array1.getChandDarChand()[1] != array2.getChandDarChand()[0]) {
-            System.out.println("incompatible dimension");
+        } else if (array1.getSize()[1] != array2.getSize()[0]) {
+            System.out.println(ANSI_RED + "incompatible dimension" + ANSI_RESET);
             return null;
         }
 
@@ -448,16 +483,17 @@ public class Main {
         }
         resultArray.setDimension(array1.getDimension());
         resultArray.setType(array1.getType());
+        resultArray.setSize(array1.getSize());
 
         Map<String, String> resultData = new HashMap<>();
 
         if (array1.getType().equals("float")) {
-            for (int i = 0; i < array1.getChandDarChand()[0]; i++) {
-                for (int j = 0; j < array2.getChandDarChand()[1]; j++) {
+            for (int i = 0; i < array1.getSize()[0]; i++) {
+                for (int j = 0; j < array2.getSize()[1]; j++) {
                     String key;
                     float sum = 0;
 
-                    for (int k = 0; k < array1.getChandDarChand()[1]; k++) {
+                    for (int k = 0; k < array1.getSize()[1]; k++) {
                         float number1 = Float.parseFloat(array1.getElements().get("[" + i + "]" + "[" + k + "]"));
                         float number2 = Float.parseFloat(array2.getElements().get("[" + k + "]" + "[" + j + "]"));
                         sum += number1 * number2;
@@ -468,12 +504,12 @@ public class Main {
                 }
             }
         } else {
-            for (int i = 0; i < array1.getChandDarChand()[0]; i++) {
-                for (int j = 0; j < array2.getChandDarChand()[1]; j++) {
+            for (int i = 0; i < array1.getSize()[0]; i++) {
+                for (int j = 0; j < array2.getSize()[1]; j++) {
                     String key;
                     int sum = 0;
 
-                    for (int k = 0; k < array1.getChandDarChand()[1]; k++) {
+                    for (int k = 0; k < array1.getSize()[1]; k++) {
                         int number1 = Integer.parseInt(array1.getElements().get("[" + i + "]" + "[" + k + "]"));
                         int number2 = Integer.parseInt(array2.getElements().get("[" + k + "]" + "[" + j + "]"));
                         sum += number1 * number2;
@@ -504,8 +540,12 @@ public class Main {
      * @return the new FariborzArray
      */
     public static FariborzArray transposingStatementHandler(String input) {
-        FariborzArray array = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").replaceAll("\\&", "").trim());
+        String nameOfTargetArray = input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").replaceAll("\\&", "").trim();
+        if (!fariborzArrays.containsKey(nameOfTargetArray)) {
+            System.out.println(ANSI_RED + "(" + nameOfTargetArray + ")" + " not found" + ANSI_RESET);
+            return null;
+        }
+        FariborzArray array = fariborzArrays.get(nameOfTargetArray);
 
         if (array.getType().matches("char|string")) {
             System.out.println("wrong type");
@@ -522,14 +562,14 @@ public class Main {
         resultArray.setDimension(array.getDimension());
         resultArray.setType(array.getType());
         int[] newChandDarChand = new int[2];
-        newChandDarChand[0] = array.getChandDarChand()[1];
-        newChandDarChand[1] = array.getChandDarChand()[0];
-        resultArray.setChandDarChand(newChandDarChand);
+        newChandDarChand[0] = array.getSize()[1];
+        newChandDarChand[1] = array.getSize()[0];
+        resultArray.setSize(newChandDarChand);
 
         Map<String, String> resultData = new HashMap<>();
 
-        for (int i = 0; i < array.getChandDarChand()[0]; i++) {
-            for (int j = 0; j < array.getChandDarChand()[1]; j++) {
+        for (int i = 0; i < array.getSize()[0]; i++) {
+            for (int j = 0; j < array.getSize()[1]; j++) {
                 String key;
                 String value = array.getElements().get("[" + i + "]" + "[" + j + "]");
                 key = "[" + j + "]" + "[" + i + "]";
@@ -556,8 +596,12 @@ public class Main {
      * @return the new FariborzArray
      */
     public static FariborzArray cutingStatementHandler(String input) {
-        FariborzArray array = fariborzArrays
-                .get(input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").replaceAll("\\[", " ").split(" ")[0]);
+        String nameOfTargetArray = input.replaceAll("\s*[a-zA-Z]+\\w*\s*=\s*", "").replaceAll("\\[", " ").split(" ")[0];
+        if (!fariborzArrays.containsKey(nameOfTargetArray)) {
+            System.out.println(ANSI_RED + "(" + nameOfTargetArray + ")" + " not found" + ANSI_RESET);
+            return null;
+        }
+        FariborzArray array = fariborzArrays.get(nameOfTargetArray);
 
         FariborzArray resultArray = new FariborzArray();
         if (input.matches(".*=.*")) {
@@ -589,7 +633,7 @@ public class Main {
         } else if (keyParts[0].matches("\\[\\d+::\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = Integer.parseInt(parts[0]);
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = Integer.parseInt(parts[2]);
         } else if (keyParts[0].matches("\\[:\\d+:\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -599,7 +643,7 @@ public class Main {
         } else if (keyParts[0].matches("\\[::\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = 0;
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = Integer.parseInt(parts[2]);
         } else if (keyParts[0].matches("\\[:\\d+:\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -609,11 +653,11 @@ public class Main {
         } else if (keyParts[0].matches("\\[\\d+::\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = Integer.parseInt(parts[0]);
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         } else if (keyParts[0].matches("\\[::\\]")) {
             start = 0;
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         } else if (keyParts[0].matches("\\[\\d+:\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -623,7 +667,7 @@ public class Main {
         } else if (keyParts[0].matches("\\[\\d+:\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = Integer.parseInt(parts[0]);
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         } else if (keyParts[0].matches("\\[:\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -632,7 +676,7 @@ public class Main {
             step = 1;
         } else if (keyParts[0].matches("\\[:\\]")) {
             start = 0;
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         }
 
@@ -687,7 +731,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[\\d+::\\d+\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = Integer.parseInt(parts[0]);
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = Integer.parseInt(parts[2]);
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -729,7 +773,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[::\\d+\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = 0;
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = Integer.parseInt(parts[2]);
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -771,7 +815,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[\\d+::\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = Integer.parseInt(parts[0]);
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -792,7 +836,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[::\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = 0;
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -834,7 +878,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[\\d+:\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = Integer.parseInt(parts[0]);
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -875,7 +919,7 @@ public class Main {
                 keys = keys3;
             } else if (keyParts[i].matches("\\[:\\]")) {
                 start = 0;
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -911,7 +955,7 @@ public class Main {
         } else if (keyParts[0].matches("\\[\\d+::\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = Integer.parseInt(parts[0]);
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = Integer.parseInt(parts[2]);
         } else if (keyParts[0].matches("\\[:\\d+:\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -921,7 +965,7 @@ public class Main {
         } else if (keyParts[0].matches("\\[::\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = 0;
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = Integer.parseInt(parts[2]);
         } else if (keyParts[0].matches("\\[:\\d+:\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -931,11 +975,11 @@ public class Main {
         } else if (keyParts[0].matches("\\[\\d+::\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = Integer.parseInt(parts[0]);
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         } else if (keyParts[0].matches("\\[::\\]")) {
             start = 0;
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         } else if (keyParts[0].matches("\\[\\d+:\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -945,7 +989,7 @@ public class Main {
         } else if (keyParts[0].matches("\\[\\d+:\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
             start = Integer.parseInt(parts[0]);
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         } else if (keyParts[0].matches("\\[:\\d+\\]")) {
             parts = keyParts[0].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
@@ -954,7 +998,7 @@ public class Main {
             step = 1;
         } else if (keyParts[0].matches("\\[:\\]")) {
             start = 0;
-            end = array.getChandDarChand()[0];
+            end = array.getSize()[0];
             step = 1;
         }
 
@@ -1009,7 +1053,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[\\d+::\\d+\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = Integer.parseInt(parts[0]);
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = Integer.parseInt(parts[2]);
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -1051,7 +1095,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[::\\d+\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = 0;
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = Integer.parseInt(parts[2]);
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -1093,7 +1137,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[\\d+::\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = Integer.parseInt(parts[0]);
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -1114,7 +1158,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[::\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = 0;
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -1156,7 +1200,7 @@ public class Main {
             } else if (keyParts[i].matches("\\[\\d+:\\]")) {
                 parts = keyParts[i].replaceAll("\\[", "").replaceAll("\\]", "").split(":");
                 start = Integer.parseInt(parts[0]);
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];
@@ -1197,7 +1241,7 @@ public class Main {
                 newArrayKeys = keys3;
             } else if (keyParts[i].matches("\\[:\\]")) {
                 start = 0;
-                end = array.getChandDarChand()[0];
+                end = array.getSize()[0];
                 step = 1;
 
                 keys2 = new String[((end - start) / step) + ((end - start) % step)];

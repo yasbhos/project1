@@ -5,39 +5,62 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 /**
- * Represents a Fariborz-Array
+ * Represents a FariborzArray
  *
  * @author Hossein Yasbolaghi
  * @author Yasbolaghi.sharrahi@gmail.com
  * @version 1.0
  */
 public class FariborzArray {
+
+    /**
+     * represents name of the FariborzArray
+     */
     private String name;
 
+    /**
+     * represents the type of the FariborzArray elements
+     */
     private String type;
 
+    /**
+     * represents the dimension of the FariborzArray
+     */
     private int dimension;
 
+    /**
+     * represents the elements of the FariborzArray in a map with their indexes as key of the elements
+     */
     private Map<String, String> elements;
 
-    private int[] chandDarChand;
+    /**
+     * represents the size of the FariborzArray
+     */
+    private int[] size;
 
+    /**
+     * cantains an error message if there is an error in the FariborzArray
+     */
     private String error;
 
     /**
-     * Creates a Fariborz-Array
+     * Creates a FariborzArray
      */
     public FariborzArray() {
         elements = new HashMap<>();
     }
 
     /**
-     * Creates a Fariborz-Array
+     * Creates a FariborzArray
      *
      * @param input the entered line
      */
     public FariborzArray(String input) {
-        name = input.split("\s*=\s*")[0].trim();
+        setName(input.split("\s*=\s*")[0].trim());
+        if (error != null) {
+            return;
+        }
+
         elements = new HashMap<>();
         setElements(input);
         if (error != null) {
@@ -46,90 +69,98 @@ public class FariborzArray {
 
         dimension = dimension(input.split("\\s*=\\s*")[1].trim());
 
-        setChandDarChand();
+        setSize();
     }
 
+    /**
+     * This is a getter for the name of the FariborzArray
+     *
+     * @return the name of the FariborzArray
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * This is a setter for the name of the FariborzArray
+     *
+     * @param name the name of the FariborzArray
+     */
+    public void setName(String name) {
+        if (name.matches("[a-zA-Z]+\\w*")) {
+            this.name = name;
+        } else {
+            error = "invalid name";
+            return;
+        }
+    }
+
+    /**
+     * This is a getter for the type of the FariborzArray
+     *
+     * @return the type of the FariborzArray
+     */
     public String getType() {
         return type;
     }
 
-    public int getDimension() {
-        return dimension;
-    }
-
-    public Map<String, String> getElements() {
-        return elements;
-    }
-
-    public int[] getChandDarChand() {
-        return chandDarChand;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public String getElement(String key) {
-        return elements.get(key);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    /**
+     * This is a setter for the type of the FariborzArray
+     *
+     * @param type the type of the FariborzArray
+     */
     public void setType(String type) {
         this.type = type;
     }
 
+    /**
+     * This is a getter for the dimension of the FariborzArray
+     *
+     * @return the dimension of the FariborzArray
+     */
+    public int getDimension() {
+        return dimension;
+    }
+
+    /**
+     * This is a setter for the dimension of the FariborzArray
+     *
+     * @param dimension the dimension of the FariborzArray
+     */
     public void setDimension(int dimension) {
         this.dimension = dimension;
     }
 
+    /**
+     * This is a getter for the elements of the FariborzArray
+     *
+     * @return the elements of the FariborzArray
+     */
+    public Map<String, String> getElements() {
+        return elements;
+    }
+
+    /**
+     * This is a setter for the elements of the FariborzArray
+     *
+     * @param elements the elements of the FariborzArray
+     */
     public void setElements(Map<String, String> elements) {
         this.elements = elements;
     }
 
-    public void setChandDarChand(int[] chandDarChand) {
-        this.chandDarChand = chandDarChand;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public void setElement(String key, String newValue) {
-        if (elements.get(key) == null) {
-            error = "out of bounds";
-            return;
-        }
-
-        if (newValue.matches("\\d+\\.")) {
-            newValue = newValue + 0;
-        } else if (newValue.matches("\\.\\d+")) {
-            newValue = 0 + newValue;
-        } else if (newValue.matches("\\.")) {
-            error = "incompatible type";
-            return;
-        } else if (newValue.matches("\".{2,}\"") || newValue.matches("\'.\'")) {
-            newValue = newValue.substring(1, newValue.length());
-        }
-
-        elements.replace(key, newValue);
-    }
-
+    /**
+     * This is a setter for the elements of the FariborzArray
+     *
+     * @param input the entered line
+     */
     private void setElements(String input) {
         input = input.split("\s*=\s*")[1].trim();
 
         String key = "";
-        int elementIndex = 0;
-
         while (input.matches("^\s*\\[.*\\]\s*$")) {
             input = input.replaceAll("^\s*\\[|\\]\s*$", "");
-            key += "[" + 0 + "]";
+            key += "[0]";
         }
 
         type = typeOfElements(input);
@@ -137,22 +168,22 @@ public class FariborzArray {
             return;
         }
 
-        String[] datas = getElements(input);
+        String[] datas = getPeacesOf(input);
         if (error != null) {
             return;
         }
 
+        int elementIndex = 0;
         for (int i = 0; i < datas.length; i++) {
             if (datas[i].equals("]")) {
                 elementIndex = 0;
                 int counter = 1;
-                String temp = "";
-
                 while (datas[i + 1].equals("]")) {
                     counter++;
                     i++;
                 }
 
+                String temp = "";
                 for (int j = 0; j < counter; j++) {
                     temp += "[0]";
                 }
@@ -160,23 +191,38 @@ public class FariborzArray {
             } else if (datas[i].equals("[")) {
                 continue;
             } else {
-                key = key.substring(0, key.length() - 3) + "[" + elementIndex + "]";
-
-                if (datas[i].matches("\'.\'")) {
-                    datas[i] = datas[i].replaceAll("\'", "");
-                } else if (datas[i].matches("\".+\"")) {
-                    datas[i] = datas[i].replaceAll("\"", "");
+                key = key.substring(0, key.length() - 3) + "[" + elementIndex++ + "]";
+                if (datas[i].matches("\'.\'") || datas[i].matches("\".+\"")) {
+                    datas[i] = datas[i].substring(1, datas[i].length() - 1);
                 }
-
                 elements.put(key, datas[i]);
-                elementIndex++;
             }
         }
-
     }
 
-    private void setChandDarChand() {
-        chandDarChand = new int[dimension];
+    /**
+     * This is a getter for the size of the FariborzArray
+     *
+     * @return the size of the FariborzArray
+     */
+    public int[] getSize() {
+        return size;
+    }
+
+    /**
+     * This is a setter for the size of the FariborzArray
+     *
+     * @param size the size of the FariborzArray
+     */
+    public void setSize(int[] size) {
+        this.size = size;
+    }
+
+    /**
+     * This method sets the size of the FariborzArray using the dimension and the elements
+     */
+    private void setSize() {
+        size = new int[dimension];
 
         for (int i = 0; i < dimension; i++) {
             int frequency = 0;
@@ -192,11 +238,73 @@ public class FariborzArray {
                 }
             }
 
-            chandDarChand[i] = frequency;
+            size[i] = frequency;
         }
     }
 
-    private String[] getElements(String input) {
+    /**
+     * This is a getter method for the error of the FariborzArray
+     *
+     * @return the error of the FariborzArray
+     */
+    public String getError() {
+        return error;
+    }
+
+    /**
+     * This is a setter method for the error of the FariborzArray
+     *
+     * @param error the error of the FariborzArray
+     */
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    /**
+     * This method returns a specific element of the FariborzArray
+     *
+     * @param key the key of the specific element
+     */
+    public String getElement(String key) {
+        return elements.get(key);
+    }
+
+    /**
+     * This method sets a specific element of the FariborzArray
+     *
+     * @param key   the key of the specific element
+     * @param newValue the value of the specific element
+     */
+    public void setElement(String key, String newValue) {
+        if (elements.get(key) == null) {
+            error = "out of bounds";
+            return;
+        } else if (!typeOf(newValue).equals(type)) {
+            error = "inequality of types";
+            return;
+        }
+
+        if (newValue.matches("\\d+\\.")) {
+            newValue = newValue + 0;
+        } else if (newValue.matches("\\.\\d+")) {
+            newValue = 0 + newValue;
+        } else if (newValue.matches("\\.")) {
+            error = "incompatible type";
+            return;
+        } else if (newValue.matches("\".{2,}\"") || newValue.matches("\'.\'")) {
+            newValue = newValue.substring(1, newValue.length() - 1);
+        }
+
+        elements.replace(key, newValue);
+    }
+
+    /**
+     * This method returns the peaces of the input with the delimiter witespace after refactoring
+     *
+     * @param input the input that will be refactored and separated
+     * @return the peaces of the input with the delimiter witespace after refactoring
+     */
+    private String[] getPeacesOf(String input) {
         input = reFactoring(input);
         if (error != null) {
             return null;
@@ -205,6 +313,12 @@ public class FariborzArray {
         return input.split("\s+");
     }
 
+    /**
+     * This method refactors the input
+     *
+     * @param input the input that will be refactored
+     * @return the refactored input
+     */
     private String reFactoring(String input) {
         String[] parts = input.trim().split("\s*\\,\s*");
 
@@ -233,10 +347,16 @@ public class FariborzArray {
         return String.join(" ", parts);
     }
 
+    /**
+     * This method returns the type of the elements of the input
+     *
+     * @param input the input that will be checked its elements type
+     * @return the type of the elements of the input
+     */
     private String typeOfElements(String input) {
         String type = null;
         input = input.trim();
-        String[] datas = getElements(input);
+        String[] datas = getPeacesOf(input);
         if (datas == null) {
             return null;
         }
@@ -264,6 +384,12 @@ public class FariborzArray {
         return type;
     }
 
+    /**
+     * This method returns the type of the specific element
+     *
+     * @param element the element that will be checked its type
+     * @return the type of the specific element
+     */
     private String typeOf(String element) {
         if (element.matches("\\d+")) {
             return "int";
@@ -278,6 +404,12 @@ public class FariborzArray {
         }
     }
 
+    /**
+     * This method returns the size of the FariborzArray
+     *
+     * @param data the data that will be checked its size
+     * @return the size of the FariborzArray
+     */
     private int dimension(String data) {
         int numberOfZeroLastDigitIndex = 0;
         for (String key : elements.keySet()) {
@@ -317,15 +449,17 @@ public class FariborzArray {
         return n;
     }
 
+    /**
+     * This method returns toString of the FariborzArray's elements
+     *
+     * @return toString of the FariborzArray's elements
+     */
     @Override
     public String toString() {
         String data = "";
         String key = "";
         for (int i = 0; i < dimension; i++) {
             key += "[0]";
-        }
-
-        for (int i = 0; i < dimension; i++) {
             data += "[";
         }
 
@@ -361,13 +495,18 @@ public class FariborzArray {
             data += "]";
         }
 
-
         return data;
     }
 
+    /**
+     * This method cheks size of two FariborzArrays
+     *
+     * @param otherArray the other FariborzArray
+     * @return true if the size of two FariborzArrays is equal, false otherwise
+     */
     public boolean isEqualSizes(FariborzArray otherArray) {
-        for (int i = 0; i < chandDarChand.length; i++) {
-            if (chandDarChand[i] != otherArray.getChandDarChand()[i]) {
+        for (int i = 0; i < size.length; i++) {
+            if (size[i] != otherArray.getSize()[i]) {
                 return false;
             }
         }
